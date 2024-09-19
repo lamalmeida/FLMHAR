@@ -54,7 +54,6 @@ def split_by_environment(dataloader):
             for key, value in data_point.items():
                 data_dict[key].append(value)
 
-        # Separate numerical and string data
         input_list = []
         output_list = []
         for key in data_dict:
@@ -63,22 +62,17 @@ def split_by_environment(dataloader):
             elif key == 'action':
                 output_list.append(torch.stack(data_dict[key]).to(device=torch.device('mps'), dtype=torch.float32))
         
-        # Combine inputs into a single tensor if there are multiple input keys
         if len(input_list) > 1:
             input = torch.cat(input_list, dim=1)
         else:
             input = input_list[0]
         
-        # Assume there is only one output tensor
         output = output_list[0]
         
-        # Create TensorDataset for numerical data
         tensor_dataset = TensorDataset(input, output)
         
-        # Create a DataLoader for the numerical data
         numerical_dataloader = DataLoader(tensor_dataset, batch_size=128, shuffle=True)
         
-        # Combine numerical DataLoader with string data
         environment_dataloaders[env] = numerical_dataloader
 
     return environment_dataloaders
